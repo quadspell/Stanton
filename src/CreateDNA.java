@@ -1,3 +1,4 @@
+import java.util.Locale;
 import java.util.Random;
 
 public class CreateDNA {
@@ -8,35 +9,33 @@ public class CreateDNA {
 				System.out.println("Not enough Rungs per Chromosome");
 				return null;
 			}
-			
+
 			Chromosome chroms[] = new Chromosome[numChromosome];
 			for(int j = 0; j < numChromosome; j++)
 			{
-				
+
 				GeneRung rungs[] = new GeneRung[rungsPerChrom];
-				
+
 				for(int i = 0; i < rungsPerChrom; i++)
 				{
-					
+
 					rungs[i] = new GeneRung(new GeneBase(), new GeneBase());
 				}
 				chroms[j] = new Chromosome(rungsPerChrom, rungs);
 			}
-			
+
 			return new DNA(numChromosome, chroms);
 	}
-	
+
 	public static DNA createChild(DNA mother, DNA father){
 		int diffChrom = mother.getNumChromosomes() - father.getNumChromosomes();
 		int baseChrom = mother.getNumChromosomes() + diffChrom;
-		
+
 		int diffRungs = mother.getChromosomes(0).getNumRungs() - father.getChromosomes(0).getNumRungs();
 		int baseRungs = mother.getChromosomes(0).getNumRungs() + diffRungs;
-		
-		int result;
-		GeneBase toAddOne;
-		GeneBase toAddTwo;
-		
+
+		GeneBase fatherOne, fatherTwo, motherOne, motherTwo;
+
 		int numChrom;
 		int numRungs;
 		if(diffChrom != 0)
@@ -47,31 +46,23 @@ public class CreateDNA {
 			numRungs = baseRungs + rand.nextInt(Math.abs(diffRungs));
 		else
 			numRungs = baseRungs;
-		
+
 		Chromosome chroms[] = new Chromosome[numChrom];
-		
-		
+
+
 		for(int j = 0; j < numChrom; j++){
 			GeneRung rungs[] = new GeneRung[numRungs];
 			for(int i = 0; i < numRungs; i++){
-				
-				result = rand.nextInt(100);
-				if(result < 50)
-					toAddOne = father.getChromosomes(j).getRungs(i).getBaseOne();
-				else if(result < 100)
-					toAddOne = mother.getChromosomes(j).getRungs(i).getBaseOne();
-				else
-					toAddOne = new GeneBase();
-				
-				result = rand.nextInt(100);
-				if(result < 33)
-					toAddTwo = father.getChromosomes(j).getRungs(i).getBaseTwo();
-				else if(result < 66)
-					toAddTwo = mother.getChromosomes(j).getRungs(i).getBaseTwo();
-				else
-					toAddTwo = new GeneBase();
-				
-				rungs[i] = new GeneRung(toAddOne, toAddTwo);
+				fatherOne = father.getChromosomes(j).getRungs(i).getBaseOne();
+				fatherTwo = father.getChromosomes(j).getRungs(i).getBaseTwo();
+				motherOne = mother.getChromosomes(j).getRungs(i).getBaseOne();
+				motherTwo = mother.getChromosomes(j).getRungs(i).getBaseTwo();
+
+				if((fatherOne == motherOne && fatherTwo == motherTwo) || (fatherOne == motherTwo && fatherTwo == motherOne)){
+					rungs[i] = helper(fatherOne, fatherTwo, motherOne, motherTwo);
+				}else{
+					rungs[i] = helper(fatherOne, fatherTwo, motherOne, motherTwo);
+				}
 			}
 			chroms[j] = new Chromosome(numRungs, rungs);
 		}
@@ -104,5 +95,26 @@ public class CreateDNA {
 		}
 		
 		return new DNA(numChrom, chroms);
+	}
+
+	private static GeneRung helper(GeneBase fatherOne, GeneBase fatherTwo, GeneBase motherOne, GeneBase motherTwo){
+		GeneBase toAddOne, toAddTwo;
+		int result = rand.nextInt(200);
+		if(result < 100)
+			toAddOne = fatherOne;
+		else if(result < 199)
+			toAddOne = motherOne;
+		else
+			toAddOne = new GeneBase(GeneCatagory.Magic, MagicGene.Junk);
+
+		result = rand.nextInt(200);
+		if(result < 100)
+			toAddTwo = fatherTwo;
+		else if(result < 199)
+			toAddTwo = motherTwo;
+		else
+			toAddTwo = new GeneBase(GeneCatagory.Magic, MagicGene.Junk);
+
+		return new GeneRung(toAddOne, toAddTwo);
 	}
 }
